@@ -321,7 +321,7 @@ const MILLICENTS: u32 = 1_000_000_000;
 //   - https://docs.substrate.io/v3/runtime/weights-and-fees
 //
 // Manually configuring weight is an advanced operation and what you really need may well be
-//   fulfilled by running the benchmarking toolchain. Refer to `benchmarking.rs` file.
+//   fulfilled by running the benchmarking toolchain. Refer to `benchmarks` file.
 struct WeightForSetDummy<T: pallet_balances::Config>(BalanceOf<T>);
 
 impl<T: pallet_balances::Config> WeighData<(&BalanceOf<T>,)> for WeightForSetDummy<T> {

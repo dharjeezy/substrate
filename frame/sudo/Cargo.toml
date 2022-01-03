@@ -21,8 +21,10 @@ sp-runtime = { version = "4.0.0", default-features = false, path = "../../primit
 frame-support = { version = "4.0.0-dev", default-features = false, path = "../support" }
 frame-system = { version = "4.0.0-dev", default-features = false, path = "../system" }
 
+frame-benchmarking = { version = "4.0.0-dev", path = "../benchmarking", optional = true, default-features = false }
+
 [dev-dependencies]
-sp-core = { version = "4.1.0-dev", path = "../../primitives/core" }
+sp-core = { version = "4.1.0-dev", path = "../../primitives/core", default-features = false}
 
 [features]
 default = ["std"]
@@ -34,5 +36,13 @@ std = [
 	"sp-runtime/std",
 	"frame-support/std",
 	"frame-system/std",
+	"frame-benchmarking/std",
 ]
+
+runtime-benchmarks = [
+	"frame-benchmarking/runtime-benchmarks",
+	"frame-support/runtime-benchmarks",
+	"frame-system/runtime-benchmarks",
+]
+
 try-runtime = ["frame-support/try-runtime"]

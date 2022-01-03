@@ -101,6 +101,7 @@ use frame_support::{traits::UnfilteredDispatchable, weights::GetDispatchInfo};
 mod mock;
 #[cfg(test)]
 mod tests;
+mod benchmarking;
 
 pub use pallet::*;
 
@@ -116,8 +117,14 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
 		/// A sudo-able call.
-		type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
+		type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo + From<frame_system::Call<Self>>;
+
+		//type WeightInfo: WeightInfo;
 	}
+
+	/*trait WeightInfo {
+		fn sudo(_c: u32) -> Weight;
+	}*/
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -140,6 +147,7 @@ pub mod pallet {
 			let dispatch_info = call.get_dispatch_info();
 			(dispatch_info.weight.saturating_add(10_000), dispatch_info.class)
 		})]
+		//#[weight = T::WeightInfo::sudo(call.len()).saturating_add(call.get_dispatch_info().weight)]
 		pub fn sudo(
 			origin: OriginFor<T>,
 			call: Box<<T as Config>::Call>,
