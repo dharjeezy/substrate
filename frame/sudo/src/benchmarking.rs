@@ -48,8 +48,7 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller.clone()), Box::new(noop.into()))
 	verify {
 		// check sudid event fired to see if it works
-		//assert_last_event::<T>(RawEvent::Sudid(Ok(())).into())
-		assert_last_event::<T>(Event::Sudid { sudo_result: Err(DispatchError::BadOrigin) }.into());
+		assert_last_event::<T>(Event::Sudid { sudo_result: Ok(()) }.into());
 	}
 }
 
