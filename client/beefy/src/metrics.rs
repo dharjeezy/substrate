@@ -19,8 +19,9 @@
 //! BEEFY Prometheus metrics definition
 
 use prometheus::{register, Counter, Gauge, PrometheusError, Registry, U64};
+use codec::{Encode, Decode};
 /// BEEFY metrics exposed through Prometheus
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Encode, Decode, PartialEq)]
 pub struct Metrics {
 	/// Current active validator set id
 	pub beefy_validator_set_id: Gauge<U64>,

@@ -86,6 +86,7 @@ pub(crate) struct VoterOracle<B: Block> {
 	sessions: VecDeque<Rounds<Payload, B>>,
 	/// Min delta in block numbers between two blocks, BEEFY should vote on.
 	min_block_delta: u32,
+	metrics: Option<Metrics>,
 }
 
 impl<B: Block> VoterOracle<B> {
@@ -93,6 +94,7 @@ impl<B: Block> VoterOracle<B> {
 	pub fn checked_new(
 		sessions: VecDeque<Rounds<Payload, B>>,
 		min_block_delta: u32,
+		metrics: Option<Metrics>,
 	) -> Option<Self> {
 		let mut prev_start = Zero::zero();
 		let mut prev_validator_id = None;
@@ -127,6 +129,7 @@ impl<B: Block> VoterOracle<B> {
 				sessions,
 				// Always target at least one block better than current best beefy.
 				min_block_delta: min_block_delta.max(1),
+				metrics
 			})
 		} else {
 			error!(target: "beefy", "🥩 Invalid sessions queue: {:?}.", sessions);
@@ -275,8 +278,9 @@ impl<B: Block> PersistedState<B> {
 		best_beefy: NumberFor<B>,
 		sessions: VecDeque<Rounds<Payload, B>>,
 		min_block_delta: u32,
+		metrics: Option<Metrics>,
 	) -> Option<Self> {
-		VoterOracle::checked_new(sessions, min_block_delta).map(|voting_oracle| PersistedState {
+		VoterOracle::checked_new(sessions, min_block_delta, metrics).map(|voting_oracle| PersistedState {
 			best_grandpa_block_header: grandpa_header,
 			best_beefy_block: best_beefy,
 			voting_oracle,
@@ -1069,6 +1073,7 @@ pub(crate) mod tests {
 			Zero::zero(),
 			vec![Rounds::new(One::one(), genesis_validator_set)].into(),
 			min_block_delta,
+			metrics.clone()
 		)
 		.unwrap();
 		let payload_provider = MmrRootProvider::new(api);

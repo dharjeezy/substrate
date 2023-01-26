@@ -71,6 +71,7 @@ pub mod justification;
 pub use communication::beefy_protocol_name::{
 	gossip_protocol_name, justifications_protocol_name as justifs_protocol_name,
 };
+use crate::metrics::Metrics;
 
 #[cfg(test)]
 mod tests;
@@ -293,7 +294,7 @@ where
 		match wait_for_runtime_pallet(&*runtime, &mut gossip_engine, &mut finality_notifications)
 			.await
 			.and_then(|best_grandpa| {
-				load_or_init_voter_state(&*backend, &*runtime, best_grandpa, min_block_delta)
+				load_or_init_voter_state(&*backend, &*runtime, best_grandpa, min_block_delta, metrics.clone())
 			}) {
 			Ok(state) => state,
 			Err(e) => {
@@ -329,6 +330,7 @@ fn load_or_init_voter_state<B, BE, R>(
 	runtime: &R,
 	best_grandpa: <B as Block>::Header,
 	min_block_delta: u32,
+	metrics: Option<Metrics>,
 ) -> ClientResult<PersistedState<B>>
 where
 	B: Block,
@@ -345,7 +347,7 @@ where
 		info!(target: "beefy", "🥩 Loading BEEFY voter state from db: {:?}.", state);
 		Ok(state)
 	} else {
-		initialize_voter_state(backend, runtime, best_grandpa, min_block_delta)
+		initialize_voter_state(backend, runtime, best_grandpa, min_block_delta, metrics)
 	}
 }
 
@@ -358,6 +360,7 @@ fn initialize_voter_state<B, BE, R>(
 	runtime: &R,
 	best_grandpa: <B as Block>::Header,
 	min_block_delta: u32,
+	metrics: Option<Metrics>,
 ) -> ClientResult<PersistedState<B>>
 where
 	B: Block,
@@ -392,7 +395,7 @@ where
 				sessions.push_front(rounds);
 			}
 			let state =
-				PersistedState::checked_new(best_grandpa, best_beefy, sessions, min_block_delta)
+				PersistedState::checked_new(best_grandpa, best_beefy, sessions, min_block_delta, metrics)
 					.ok_or_else(|| ClientError::Backend("Invalid BEEFY chain".into()))?;
 			break state
 		}
@@ -410,7 +413,7 @@ where
 			);
 
 			sessions.push_front(Rounds::new(genesis_num, genesis_set));
-			break PersistedState::checked_new(best_grandpa, Zero::zero(), sessions, min_block_delta)
+			break PersistedState::checked_new(best_grandpa, Zero::zero(), sessions, min_block_delta, metrics)
 				.ok_or_else(|| ClientError::Backend("Invalid BEEFY chain".into()))?
 		}
 
